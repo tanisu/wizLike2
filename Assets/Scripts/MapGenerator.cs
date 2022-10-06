@@ -7,8 +7,9 @@ public class MapGenerator : MonoBehaviour
 {
     [SerializeField] TextAsset mapText;
     [SerializeField] GameObject[] prefabs;
+    
 
-    enum MAP_TYPE
+    public enum MAP_TYPE
     {
         GROUND, //0
         WALL,   //1
@@ -17,11 +18,14 @@ public class MapGenerator : MonoBehaviour
     MAP_TYPE[,] mapTable;
     float mapSize;
     Vector2 centerPos;
+    
 
     void Start()
     {
+        
         _loadMapData();
         _createMap();
+        
     }
 
     void _loadMapData()
@@ -46,11 +50,9 @@ public class MapGenerator : MonoBehaviour
     void _createMap()
     {
         mapSize = prefabs[1].GetComponent<SpriteRenderer>().bounds.size.x;
-        Debug.Log(mapSize);
+        
 
 
-        //’†SÀ•W‚ğæ“¾
-        //c‰¡‚Ì”‚ğ”¼•ª‚É‚µ‚ÄmapSize‚ğŠ|‚¯‚é‚±‚Æ‚Å’†S‚ğ‹‚ß‚é
         if(mapTable.GetLength(0) % 2 == 0)
         {
             centerPos.x = mapTable.GetLength(0) / 2 * mapSize - (mapSize / 2);
@@ -75,19 +77,30 @@ public class MapGenerator : MonoBehaviour
             for(int x = 0;x < mapTable.GetLength(0); x++)
             {
                 Vector2Int pos = new Vector2Int(x, y);
-                GameObject _ground  = Instantiate(prefabs[(int)MAP_TYPE.GROUND]);
-                GameObject _map = Instantiate(prefabs[(int)mapTable[x,y]]);
-                _ground.transform.position = _screenPos(pos);
-                _map.transform.position = _screenPos(pos);
+                GameObject _ground  = Instantiate(prefabs[(int)MAP_TYPE.GROUND],transform);
+                GameObject _map = Instantiate(prefabs[(int)mapTable[x,y]],transform);
+                _ground.transform.position = ScreenPos(pos);
+                _map.transform.position = ScreenPos(pos);
+
+                if(mapTable[x,y] == MAP_TYPE.PLAYER)
+                {
+                    _map.GetComponent<Player>().currentPos = pos;
+                    
+                }
             }
         }
     }
 
-    Vector2 _screenPos(Vector2Int _pos)
+    public Vector2 ScreenPos(Vector2Int _pos)
     {
         return new Vector2(
             _pos.x * mapSize - centerPos.x ,
             -(_pos.y * mapSize - centerPos.y));
 
+    }
+
+    public MAP_TYPE GetNextMapType(Vector2Int _pos)
+    {
+        return mapTable[_pos.x, _pos.y];
     }
 }
